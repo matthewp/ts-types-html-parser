@@ -1,8 +1,9 @@
 {
   "name": "ts-types-html-parser",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "HTML parser in TypeScript types",
+  "main": "main.js",
+  "types": "./parser.d.ts",
   "directories": {
     "test": "test"
   },
@@ -20,6 +21,10 @@
   "keywords": [
     "typescript",
     "html parser"
+  ],
+  "files": [
+    "main.js",
+    "parser.d.ts"
   ],
   "author": "Matthew Phillips",
   "license": "BSD-2-Clause",

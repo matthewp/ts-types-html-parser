@@ -23,7 +23,13 @@ test('classes', () => {
 });
 
 test('element with attrs and children', () => {
-  const html = `<div id="foo" class="one two"><span id="inner"></span></div>`;
+  const html = `
+    <div id="foo" class="one two">
+      <span id="inner1">
+        <span class="inner2"></span>
+      </span>
+    </div>
+  `;
   type ast = ParseHTML<typeof html>;
 
   // Check attributes and children
@@ -31,10 +37,10 @@ test('element with attrs and children', () => {
   expectTypeOf<['one', 'two']>().toEqualTypeOf<ast['classes']>();
 
   // 1 child
-  expectTypeOf<1>().toEqualTypeOf<ast['children']['length']>();
+  expectTypeOf<2>().toEqualTypeOf<ast['children']['length']>();
 
   // Check child attributes
-  expectTypeOf<{ id: 'inner' }>().toEqualTypeOf<ast['children'][0]['attrs']>();
+  expectTypeOf<{ id: 'inner1' }>().toEqualTypeOf<ast['children'][1]['attrs']>();
   // Check child classes
-  expectTypeOf<[]>().toEqualTypeOf<ast['children'][0]['classes']>();
+  expectTypeOf<[]>().toEqualTypeOf<ast['children'][1]['classes']>();
 });
