@@ -42,7 +42,7 @@ declare namespace parser {
 
 type AddAttr<A, N extends string, V> = util.extendShape<A, { [k in N]: V }>;
 
-type ParseHTML<T> = T extends string ? TagStart<util.trimStart<T>> : never;
+type ParseFragment<T> = T extends string ? TagStart<util.trimStart<T>> : never;
 type TagStart<S> = S extends `<${infer T} ${infer A}`
     ? Classes<Children<ElementNode<T>, A>, A>
     : S extends `<${infer T}>${infer C}` ? T : never;
@@ -73,5 +73,5 @@ type Fragment<S extends string, N extends Node[] = []> =
               : N;
 
 export {
-  ParseHTML,
+  ParseFragment,
 }

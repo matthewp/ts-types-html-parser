@@ -1,10 +1,10 @@
-import { ParseHTML } from '../parser';
+import { ParseFragment } from '../parser';
 import { expectTypeOf } from 'expect-type';
 import { test } from 'node:test';
 
 test('attributes', () => {
   const html = `<div id="foo" class="one two"></div>`;
-  type ast = ParseHTML<typeof html>;
+  type ast = ParseFragment<typeof html>;
 
   expectTypeOf<'foo'>().toEqualTypeOf<ast['attrs']['id']>();
 
@@ -14,7 +14,7 @@ test('attributes', () => {
 
 test('classes', () => {
   const html = `<div id="foo" class="one two"></div>`;
-  type ast = ParseHTML<typeof html>;
+  type ast = ParseFragment<typeof html>;
 
   expectTypeOf<['one', 'two']>().toEqualTypeOf<ast['classes']>();
 
@@ -30,7 +30,7 @@ test('element with attrs and children', () => {
       </span>
     </div>
   `;
-  type ast = ParseHTML<typeof html>;
+  type ast = ParseFragment<typeof html>;
 
   // Check attributes and children
   expectTypeOf<'foo'>().toEqualTypeOf<ast['attrs']['id']>();
