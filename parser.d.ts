@@ -18,6 +18,8 @@ declare namespace util {
   type trim<T extends string> = trimEnd<trimStart<T>>;
 }
 
+type NodeType = 1 | 3 | 11 | 99;
+
 type ElementNode<T extends string> = {
   nodeType: 1;
   tag: T;
@@ -25,14 +27,22 @@ type ElementNode<T extends string> = {
       [n: string]: string;
   },
   classes: readonly string[];
-  children: Array<Node>;
+  children: Node[];
 };
 type TextNode<T extends string> = {
   nodeType: 3;
   data: T;
 } & {};
+type FragmentNode<C extends Node[]> = {
+  nodeType: 11;
+  children: C;
+};
+type DebugNode<T extends string> = {
+  nodeType: 99;
+  data: T;
+}
 
-type Node = ElementNode<any> | TextNode<any>;
+type Node = ElementNode<any> | TextNode<any> | DebugNode<any>;
 
 // HTML parser
 declare namespace parser {
@@ -42,10 +52,12 @@ declare namespace parser {
 
 type AddAttr<A, N extends string, V> = util.extendShape<A, { [k in N]: V }>;
 
-type ParseFragment<T> = T extends string ? TagStart<util.trimStart<T>> : never;
+type ParseFragment<T> = T extends string
+  ? FragmentNode<[TagStart<util.trimStart<T>>]>
+  : never;
 type TagStart<S> = S extends `<${infer T} ${infer A}`
     ? Classes<Children<ElementNode<T>, A>, A>
-    : S extends `<${infer T}>${infer C}` ? T : never;
+    : S extends `<${infer T}>${infer _C}` ? DebugNode<T> : DebugNode<never>;
 
 // Attributes
 type Attributes<H, S> = util.extendShape<H, { attrs: ParseAttribute<{}, S> }>;
@@ -72,6 +84,22 @@ type Fragment<S extends string, N extends Node[] = []> =
               ? Fragment<util.trimStart<S>, [...N, TextNode<R>]>
               : N;
 
+// Extras
+type getElementChildren<T extends ElementNode<any> | FragmentNode<any>> = Extract<T['children'][number], { nodeType: 1 }>;
+type appendId<B, T extends ElementNode<any>> = T extends { attrs: { id: string } }
+  ? B | `#${T['attrs']['id']}` : B;
+type appendClasses<B, T extends ElementNode<any>> = B | `.${T['classes'][number]}`;
+type getSelectors<B, T extends ElementNode<any> | FragmentNode<any>> =
+  T extends ElementNode<any>
+    // Elements
+    ? getElementChildren<T> extends never
+      ? appendClasses<appendId<B, T>, T>
+      : getSelectors<appendClasses<appendId<B, T>, T>, getElementChildren<T>>
+    // Fragments
+    : getElementChildren<T> extends never ? B : getSelectors<B, getElementChildren<T>>;
+type GetSelectors<T extends ElementNode<any> | FragmentNode<any>> = getSelectors<never, T> & {};
+
 export {
   ParseFragment,
+  GetSelectors
 }
