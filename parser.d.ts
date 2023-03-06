@@ -94,7 +94,7 @@ type splitClasses<C extends string, SS> = C extends `${infer A} ${infer B}`
 type getClassSelectors<S extends string, SS> = S extends `${infer _A}class="${infer V}"${infer B}`
   ? getClassSelectors<B, SS | splitClasses<V, never>> : SS
 
-type GetSelectors<S extends string> = getIDSelectors<S, never> | getClassSelectors<S, never>;
+type GetSelectors<S extends string> = getIDSelectors<S, never> | getClassSelectors<S, never> & {};
 
 
 export {
