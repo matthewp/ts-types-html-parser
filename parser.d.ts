@@ -27,7 +27,7 @@ type ElementNode<T extends string> = {
       [n: string]: string;
   },
   classes: readonly string[];
-  children: Node[];
+  children: ChildNode[];
 };
 type TextNode<T extends string> = {
   nodeType: 3;
@@ -42,7 +42,8 @@ type DebugNode<T extends string> = {
   data: T;
 }
 
-type Node = ElementNode<any> | TextNode<any> | DebugNode<any>;
+type Node = ElementNode<any> | TextNode<any> | DebugNode<any> | FragmentNode<any>;
+type ChildNode = ElementNode<any> | TextNode<any> | DebugNode<any>;
 
 // HTML parser
 declare namespace parser {
@@ -85,19 +86,16 @@ type Fragment<S extends string, N extends Node[] = []> =
               : N;
 
 // Extras
-type getElementChildren<T extends ElementNode<any> | FragmentNode<any>> = Extract<T['children'][number], { nodeType: 1 }>;
-type appendId<B, T extends ElementNode<any>> = T extends { attrs: { id: string } }
-  ? B | `#${T['attrs']['id']}` : B;
-type appendClasses<B, T extends ElementNode<any>> = B | `.${T['classes'][number]}`;
-type getSelectors<B, T extends ElementNode<any> | FragmentNode<any>> =
-  T extends ElementNode<any>
-    // Elements
-    ? getElementChildren<T> extends never
-      ? appendClasses<appendId<B, T>, T>
-      : getSelectors<appendClasses<appendId<B, T>, T>, getElementChildren<T>>
-    // Fragments
-    : getElementChildren<T> extends never ? B : getSelectors<B, getElementChildren<T>>;
-type GetSelectors<T extends ElementNode<any> | FragmentNode<any>> = getSelectors<never, T> & {};
+type getIDSelectors<S extends string, SS> = S extends `${infer _A}id="${infer V}"${infer B}`
+  ? getIDSelectors<B, SS | `#${V}`> : SS;
+
+type splitClasses<C extends string, SS> = C extends `${infer A} ${infer B}`
+  ? splitClasses<B, SS | `.${A}`> : SS | `.${C}`;
+type getClassSelectors<S extends string, SS> = S extends `${infer _A}class="${infer V}"${infer B}`
+  ? getClassSelectors<B, SS | splitClasses<V, never>> : SS
+
+type GetSelectors<S extends string> = getIDSelectors<S, never> | getClassSelectors<S, never>;
+
 
 export {
   ParseFragment,
