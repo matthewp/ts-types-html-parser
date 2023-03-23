@@ -1,6 +1,6 @@
 {
   "name": "ts-types-html-parser",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "HTML parser in TypeScript types",
   "main": "main.js",
   "types": "./parser.d.ts",
